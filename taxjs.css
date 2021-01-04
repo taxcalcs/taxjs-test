@@ -1,0 +1,46 @@
+.input-group>.form-floating {
+    position : relative;
+    flex     : 1 1 auto;
+    width    : 1%;
+    min-width: 0;
+}
+
+#inputFields img {
+    width : 20px;
+    height: 20px;
+}
+
+#inputFields .form-control {
+    border-top-left-radius   : 0;
+    border-bottom-left-radius: 0;
+}
+
+#outputFields img {
+    width : 20px;
+    height: 20px;
+}
+
+#outputFields li {
+    padding: 0;
+}
+
+#outputFields .icon {
+    padding: .375rem .75rem;
+}
+
+#outputFields .icon:first {
+    border-radius: .25rem 0 0 0;
+}
+
+#outputFields .name,
+#outputFields>ul>li>.badge {
+    margin: .375rem .75rem;
+}
+
+.col {
+    margin-top: 10px;
+}
+
+button.calculate {
+    margin: 10px 0;
+}

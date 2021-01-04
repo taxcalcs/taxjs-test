@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Testseite für TaxJs</title>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Testseite für TaxJs</h1>
+    <h2>Eingabe</h2>
+    <form>
+      <div class="form-floating">
+        <select class="form-select" id="yearSelection" aria-label="Jahr auswählen">
+          <option value="2021" selected>2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+          <option value="2015">2015</option>
+          <option value="2014">2014</option>
+          <option value="2013">2013</option>
+          <option value="2012">2012</option>
+          <option value="2011">2011</option>
+          <option value="2010">2010</option>
+          <option value="2009">2009</option>
+          <option value="2008">2008</option>
+          <option value="2007">2007</option>
+          <option value="2006">2006</option>
+        </select>
+        <label for="yearSelection">Jahr auswählen</label>
+      </div>
+    </form>
+    <form>
+      <div id="inputFields"></div>
+    </form>
+    <h2>Ausgabe</h2>
+    <div id="outputFields">
+      <p>Fehler</p>
+    </div>
+  </div>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link href="taxjs.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"
+    integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js"
+    integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+    integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.8.2/dist/system.min.js"
+    integrity="sha256-DkA9fPgurgawXiNmb7dpo7DKuvB/IfvuYc0zh2KtZ38=" crossorigin="anonymous"></script>
+  <script src="taxjs-data.js"></script>
+
+  <script type="systemjs-importmap">
+    {
+      "imports": {
+        "big.js": "https://cdn.jsdelivr.net/npm/big.js@6.0.3/big.min.js",
+        "taxjs/": "https://cdn.jsdelivr.net/npm/taxjs@2021.0.0/dist/system/"
+      }
+    }
+  </script>
+  <script>
+    (function ($) {
+      var TaxJsTest = /** @class */ (function () {
+        function TaxJsTest() {
+          this.model = {};
+          this.taxData = new TaxJsData();
+          this.inputFields = $('#inputFields');
+          this.yearSelection = $('#yearSelection');
+          this.outputFields = $('#outputFields');
+          this.inputPopovers = function () { return this.inputFields.find('*[data-bs-toggle="popover"]'); };
+          this.outputPopvers = function () { return this.outputFields.find('*[data-bs-toggle="popover"]'); };
+
+          let iam = this;
+
+          // init model with default values
+          Object.entries(iam.taxData.getAllDefaultValues()).forEach(([key, value]) => {
+            iam.model[iam.taxData.normalizeName(key)] = value;
+          });
+
+          System.import("big.js").then(BigJs => {
+            iam.yearSelection.on('change', function () {
+              let select = $(this);
+              iam.changeYear(Number(select.val()), BigJs);
+            });
+            iam.changeYear(Number(iam.yearSelection.val()), BigJs);
+          });
+        };
+
+        TaxJsTest.prototype.fillTax = function (tax, BigJs) {
+          let iam = this;
+          for (const input of tax.getInputs()) {
+            let val = iam.model[iam.taxData.normalizeName(input)];
+            if (val !== '') {
+              if (iam.taxData.getType(input) === 'big') {
+                tax.setBig(input, new BigJs.Big(val));
+              } else {
+                tax.setNumber(input, val);
+              }
+            }
+          };
+        };
+
+        TaxJsTest.prototype.printInputs = function (tax, year) {
+          let iam = this;
+          // print input fields
+          iam.inputFields.html('');
+          let ins = '';
+          let i = 0;
+          for (const input of tax.getInputs()) {
+            //console.log('"' + input + '": {"default": 0, "type": "",  "name": "", "description": ""},');
+            if (i % 2 === 0) { ins += '<div class="row">'; }
+            ins += '<div class="col col-12 col-lg-6">';
+            ins += '<div class="input-group">';
+            ins += '<div class="input-group-text"><img data-bs-toggle="popover" data-bs-trigger="hover" title="' + input + '" data-bs-content="' + iam.taxData.getDescription(input, year) + '" src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.2.2/icons/info-circle.svg" alt="Info"></i></div>';
+            ins += '<div class="form-floating">';
+            ins += '<input type="number" step="any" class="form-control" data-field="' + input + '" id="input' + input + '" value="' + iam.taxData.getDefaultValue(input) + '">';
+            ins += '<label for="input' + input + '">' + iam.taxData.getName(input) + '</label>';
+            ins += '</div>'; // form-floating
+            ins += '</div>'; // input-group
+            ins += '</div>'; // col-12 col-lg-6
+            if (i % 2 === 1) { ins += '</div>'; }
+            i++;
+          };
+          iam.inputFields.append(ins);
+          // init tooltips
+          for (const obj of iam.inputPopovers()) {
+            new bootstrap.Popover(obj);
+          };
+        };
+
+        TaxJsTest.prototype.printOutputs = function (tax, year) {
+          let iam = this;
+          iam.outputFields.html('');
+          let outs = '<ul class="list-group">';
+          for (const output of tax.getOutputs()) {
+            outs += '<li class="list-group-item d-flex justify-content-between align-items-center">';
+            outs += '<span class="icon"><img data-bs-toggle="popover" data-bs-trigger="hover" title="' + output + '" data-bs-content="' + iam.taxData.getDescription(output, year) + '" src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.2.2/icons/info-circle.svg" alt="Info"></span>';
+            outs += '<span class="name">';
+            outs += (iam.taxData.isDBAOutput(output) ? '<span class="badge rounded-pill bg-light text-dark" title="Doppelbesteuerungsabkommen">DBA</span> ' : '');
+            outs += iam.taxData.getName(output);
+            outs += ': </span>';
+            let val;
+            if (iam.taxData.getType(output) === 'big') {
+              val = tax.getBig(output).toNumber();
+            } else {
+              val = tax.getNumber();
+            }
+            outs += '<span class="badge ' + (val === 0 ? 'bg-secondary' : 'bg-success') + '">';
+            outs += val;
+            outs += '</span>';
+            outs += '</li>';
+          };
+          outs += '</ul>';
+          iam.outputFields.append(outs);
+          // init tooltips
+          for (const obj of iam.outputPopvers()) {
+            new bootstrap.Popover(obj);
+          };
+        };
+
+        TaxJsTest.prototype.calculate = function (tax, BigJs, year) {
+          this.fillTax(tax, BigJs);
+          tax.calculate();
+          this.printOutputs(tax, year);
+        };
+
+        TaxJsTest.prototype.changeYear = function (year, BigJs) {
+          let iam = this;
+          let taxClass = iam.taxData.getTaxClass(year);
+          System.import('taxjs/' + taxClass + '.min.js').then(TaxJs => {
+            let tax = new TaxJs[taxClass]();
+            tax.initInputs();
+
+            iam.inputFields.off().on('change', 'input', function () {
+              let inputTag = $(this);
+              iam.model[inputTag.data('field')] = inputTag.val();
+              iam.calculate(tax, BigJs, year);
+            });
+
+            iam.printInputs(tax, year);
+            iam.calculate(tax, BigJs, year);
+          });
+        };
+
+        return TaxJsTest;
+      }());
+      window.TaxJsTest = TaxJsTest;
+    })(jQuery.noConflict());
+
+    (new TaxJsTest());
+  </script>
+</body>
+
+</html>
