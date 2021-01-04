@@ -109,6 +109,15 @@
           };
         };
 
+        TaxJsTest.prototype.initPopOver = function (obj) {
+          let type = $(obj).data('type');
+          let typePrint = type === 'big' ? 'Big' : type === 'number' ? 'Number' : '';
+          new bootstrap.Popover(obj, {
+            template: '<div class="popover" role="tooltip"><div class="popover-arrow"></div><h3><span class="popover-header"></span> <span class="badge bg-secondary">' + typePrint + '</span></h3><div class="popover-body"></div></div>'
+          });
+          ;
+        }
+
         TaxJsTest.prototype.printInputs = function (tax, year) {
           let iam = this;
           // print input fields
@@ -120,7 +129,7 @@
             if (i % 2 === 0) { ins += '<div class="row">'; }
             ins += '<div class="col col-12 col-lg-6">';
             ins += '<div class="input-group">';
-            ins += '<div class="input-group-text"><img data-bs-toggle="popover" data-bs-trigger="hover" title="' + input + '" data-bs-content="' + iam.taxData.getDescription(input, year) + '" src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.2.2/icons/info-circle.svg" alt="Info"></i></div>';
+            ins += '<div class="input-group-text"><img data-bs-toggle="popover" data-type="' + iam.taxData.getType(input) + '" data-bs-trigger="hover" title="' + input + '" data-bs-content="' + iam.taxData.getDescription(input, year) + '" src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.2.2/icons/info-circle.svg" alt="Info"></i></div>';
             ins += '<div class="form-floating">';
             ins += '<input type="number" step="any" class="form-control" data-field="' + input + '" id="input' + input + '" value="' + iam.taxData.getDefaultValue(input) + '">';
             ins += '<label for="input' + input + '">' + iam.taxData.getName(input) + '</label>';
@@ -133,7 +142,7 @@
           iam.inputFields.append(ins);
           // init tooltips
           for (const obj of iam.inputPopovers()) {
-            new bootstrap.Popover(obj);
+            iam.initPopOver(obj);
           };
         };
 
@@ -143,7 +152,7 @@
           let outs = '<ul class="list-group">';
           for (const output of tax.getOutputs()) {
             outs += '<li class="list-group-item d-flex justify-content-between align-items-center">';
-            outs += '<span class="icon"><img data-bs-toggle="popover" data-bs-trigger="hover" title="' + output + '" data-bs-content="' + iam.taxData.getDescription(output, year) + '" src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.2.2/icons/info-circle.svg" alt="Info"></span>';
+            outs += '<span class="icon"><img data-bs-toggle="popover" data-type="' + iam.taxData.getType(output) + '" data-bs-trigger="hover" title="' + output + '" data-bs-content="' + iam.taxData.getDescription(output, year) + '" src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.2.2/icons/info-circle.svg" alt="Info"></span>';
             outs += '<span class="name">';
             outs += (iam.taxData.isDBAOutput(output) ? '<span class="badge rounded-pill bg-light text-dark" title="Doppelbesteuerungsabkommen">DBA</span> ' : '');
             outs += iam.taxData.getName(output);
@@ -163,7 +172,7 @@
           iam.outputFields.append(outs);
           // init tooltips
           for (const obj of iam.outputPopvers()) {
-            new bootstrap.Popover(obj);
+            iam.initPopOver(obj);
           };
         };
 

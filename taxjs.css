@@ -44,3 +44,22 @@
 button.calculate {
     margin: 10px 0;
 }
+
+.popover h3 {
+    padding                : .5rem 1rem;
+    margin-bottom          : 0;
+    font-size              : 1rem;
+    background-color       : #f0f0f0;
+    border-bottom          : 1px solid #d8d8d8;
+    border-top-left-radius : calc(.3rem - 1px);
+    border-top-right-radius: calc(.3rem - 1px);
+}
+
+.popover h3 .badge {
+    float: right;
+}
+
+.popover-header {
+    padding: 0;
+    border : 0;
+}
